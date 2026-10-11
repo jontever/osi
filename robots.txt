@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://osi.cyberassure.uk/sitemap.xml

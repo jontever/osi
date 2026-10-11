@@ -12,12 +12,12 @@ Live at **<https://osi.cyberassure.uk>** · Created by [Jon Silvester](https://w
 - Search across all protocols and controls (press `/`). Press `1`–`7` to jump to a layer, `Space` to play or pause the dataflow, and `Esc` to clear.
 - The theme switcher offers Auto (follows the system setting), Dark and Light, and remembers your choice.
 - Animation is off by default for visitors whose system is set to reduce motion.
-- A3 landscape PDFs are included in a dark version and a light version for printing (`/downloads`). Printing from the browser also produces A3 landscape.
+- A3 landscape PDFs are included in a dark version and a light version for printing. Printing from the browser also produces A3 landscape.
 - The site has no dependencies, no build step, no trackers and no third-party requests. Fonts are self-hosted under the SIL Open Font Licence.
 
 ## Deploy
 
-1. Create a new GitHub repository and upload the contents of this folder to its root, so that `index.html` sits at the top level.
+1. Create a new GitHub repository and upload every file in this folder to its root. The layout is deliberately flat (no subfolders), so dragging the files in through GitHub's **Add file → Upload files** works as-is.
 2. In Vercel, choose **Add New → Project**, import the repository, and use these settings:
    - **Framework preset:** Other
    - **Build command:** leave empty
@@ -44,13 +44,12 @@ The canonical, Open Graph and Twitter tags in `index.html`, along with `robots.t
 
 - A strict Content Security Policy: same-origin scripts, styles and fonts only, with no inline scripts and no `eval`. The policy permits inline style *attributes* only (`style-src-attr`), because the diagram colours each layer through CSS custom properties.
 - HSTS (two years, including subdomains; `preload` is left off because only apex domains can join the preload list), `X-Content-Type-Options`, `X-Frame-Options: DENY` with `frame-ancestors 'none'`, a restrictive `Permissions-Policy`, `Referrer-Policy`, and COOP.
-- Long-lived caching for fonts.
 
 You can check the headers after deployment at <https://securityheaders.com>.
 
 ## Editing content
 
-All the content lives in `assets/js/data.js`:
+All the content lives in `data.js`:
 
 - `LAYERS` holds the protocols, controls, descriptions and threats for each layer.
 - `CROSS_LAYER` holds the capabilities that apply to every layer.
@@ -61,28 +60,27 @@ The ring layout is calculated in the browser from measured text widths, so addin
 
 ## Regenerating the PDFs, OG image and icons (optional)
 
-The `tools/` folder is excluded from deployment by `.vercelignore`. To regenerate the assets, you need Python 3 with `playwright` and `Pillow` installed:
+`og.html`, `render.py` and `serve.py` are build tools and are excluded from deployment by `.vercelignore`. To regenerate the assets, you need Python 3 with `playwright` and `Pillow` installed:
 
 ```bash
-python3 tools/serve.py . 8123 &      # local server that applies the vercel.json headers
-python3 tools/render.py              # writes og.png, favicons and downloads/*.pdf
+python3 serve.py . 8123 &      # local server that applies the vercel.json headers
+python3 render.py              # writes og.png, favicons and both A3 PDFs
 ```
 
-## Structure
+## Structure (flat)
 
 ```
-index.html            app shell, meta and Open Graph tags
-404.html
-assets/css/app.css    styles and themes
-assets/js/theme-init.js   sets the theme before first paint (avoids a flash)
-assets/js/data.js     content model
-assets/js/app.js      layout, interaction and dataflow animation
-assets/fonts/         Space Grotesk and IBM Plex Mono (OFL)
-downloads/            A3 PDFs
+index.html, 404.html          app shell, meta and Open Graph tags
+app.css                       styles and themes
+theme-init.js                 sets the theme before first paint (avoids a flash)
+data.js                       content model
+app.js                        layout, interaction and dataflow animation
+*.woff2 + LICENSE-*-OFL.txt   Space Grotesk and IBM Plex Mono (SIL OFL 1.1)
+OSI-Security-Rings-A3*.pdf    downloadable posters
 og.png, favicon.*, icon-*.png, apple-touch-icon.png, site.webmanifest
 robots.txt, sitemap.xml
-vercel.json           headers and clean URLs
-tools/                render scripts (not deployed)
+vercel.json                   security headers and clean URLs
+og.html, render.py, serve.py  asset tooling (not deployed)
 ```
 
 ## Note on accuracy

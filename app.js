@@ -345,7 +345,7 @@ function renderPanel() {
       <h3>Cross-layer capabilities</h3>
       <ul class="items">${CROSS_LAYER.map(c => `<li style="--c:var(--muted)"><b><i></i>${esc(c.n)}</b><span>${esc(c.d)}</span></li>`).join("")}</ul>
       <h3>Downloads</h3>
-      <div class="dl"><a class="btn" href="/downloads/OSI-Security-Rings-A3.pdf" download>A3 PDF · dark</a><a class="btn" href="/downloads/OSI-Security-Rings-A3-print-light.pdf" download>A3 PDF · light (print)</a></div>
+      <div class="dl"><a class="btn" href="/OSI-Security-Rings-A3.pdf" download>A3 PDF · dark</a><a class="btn" href="/OSI-Security-Rings-A3-print-light.pdf" download>A3 PDF · light (print)</a></div>
       ${CREDIT}
     </div>`;
     return;

@@ -77,8 +77,8 @@ aside{border-left:1px solid var(--line);background:var(--surface);height:calc(10
 /* side panel */
 .nav{position:sticky;top:0;background:var(--surface);padding:12px 16px 10px;border-bottom:1px solid var(--line);z-index:2}
 .nav .lbl{font:500 11px "IBM Plex Mono",monospace;letter-spacing:.08em;color:var(--muted);text-transform:uppercase;margin-bottom:8px}
-.nav .row{display:grid;grid-template-columns:repeat(8,1fr);gap:5px}
-.nav button{border:1px solid var(--line);background:var(--bg);border-radius:7px;padding:6px 0;cursor:pointer;font:600 13px "IBM Plex Mono",monospace;position:relative}
+.nav .row{display:grid;grid-template-columns:repeat(10,1fr);gap:4px}
+.nav button{border:1px solid var(--line);background:var(--bg);border-radius:7px;padding:6px 0;cursor:pointer;font:600 12px "IBM Plex Mono",monospace;position:relative}
 .nav button::after{content:"";position:absolute;left:6px;right:6px;bottom:3px;height:2px;border-radius:2px;background:var(--c);opacity:.9}
 .nav button.on{background:var(--c);color:var(--pillInk);border-color:var(--c)}
 .nav button.all::after{display:none}
@@ -127,9 +127,9 @@ kbd{font:11px "IBM Plex Mono",monospace;border:1px solid var(--line);border-radi
 .t-meta{font:500 2.5px "IBM Plex Mono",monospace;fill:var(--muted);letter-spacing:.12px}
 .t-kick{font:500 2.5px "IBM Plex Mono",monospace;fill:var(--muted);letter-spacing:.25px}
 .t-head{font-weight:700;font-size:4.6px;fill:var(--ink)}
-.t-chip-p{font:500 2.7px "IBM Plex Mono",monospace;fill:var(--chipInk)}
-.t-chip-s{font-weight:500;font-size:2.8px;fill:var(--chipInk)}
-.t-pill{font-weight:700;font-size:2.7px;fill:var(--pillInk);letter-spacing:.14px}
+.t-chip-p{font:500 2.45px "IBM Plex Mono",monospace;fill:var(--chipInk)}
+.t-chip-s{font-weight:500;font-size:2.55px;fill:var(--chipInk)}
+.t-pill{font-weight:700;font-size:2.45px;fill:var(--pillInk);letter-spacing:.14px}
 .t-key{font-weight:700;font-size:2.9px;fill:var(--ink)}
 .t-keysub{font:400 2.2px "IBM Plex Mono",monospace;fill:var(--muted)}
 .t-note{font-size:2.4px;fill:var(--muted)}
@@ -160,6 +160,35 @@ kbd{font:11px "IBM Plex Mono",monospace;border:1px solid var(--line);border-radi
 .chip.flash .chip-bg{stroke:var(--bad);stroke-opacity:1}
 .chip.flash .chip-rect{fill:var(--bad);fill-opacity:1}
 .chip.flash text{fill:#fff;font-weight:700}
+
+/* control function (prevent / detect / respond) */
+.lbl2{margin-top:10px}
+.fnseg{display:grid;grid-template-columns:auto 1fr 1fr 1fr;gap:4px}
+.fnseg button{border:1px solid var(--line);background:var(--bg);border-radius:7px;padding:5px 7px;cursor:pointer;font-size:12.5px;display:flex;align-items:center;justify-content:center;gap:5px}
+.fnseg button[aria-pressed="true"]{background:var(--surface2);border-color:var(--muted)}
+abbr.fb{display:inline-grid;place-items:center;width:16px;height:16px;border-radius:4px;font:700 10px "IBM Plex Mono",monospace;text-decoration:none;color:#0B0E14;vertical-align:1px;flex:none}
+.fb-P{background:#7FA6F5}.fb-D{background:#F2C14E}.fb-R{background:#FF8A6B}
+.fnb{display:inline-flex;gap:3px;margin-left:4px}
+.cov{display:grid;gap:5px;margin:0 0 10px}
+.cov div{display:grid;grid-template-columns:16px 64px 1fr 22px;align-items:center;gap:8px;font-size:12.5px;color:var(--muted)}
+.cov i{display:block;height:6px;border-radius:3px;background:linear-gradient(90deg,var(--c) var(--w),var(--surface2) var(--w))}
+.cov b{font:600 12px "IBM Plex Mono",monospace;color:var(--ink);text-align:right}
+.covt{width:100%;border-collapse:collapse;font-size:13px}
+.covt th,.covt td{padding:4px 6px;border-bottom:1px solid var(--line);text-align:center}
+.covt th:first-child{text-align:left;font-weight:500;display:flex;align-items:center;gap:8px}
+.covt td{font:500 12.5px "IBM Plex Mono",monospace}
+.covt td.zero{color:var(--bad)}
+.covt .n{font:600 11px "IBM Plex Mono",monospace;background:var(--c);color:var(--pillInk);border-radius:4px;padding:1px 4px;min-width:24px;text-align:center}
+.hint{font-size:12.5px!important}
+.caveat{border-left:3px solid var(--bad);padding-left:10px;color:var(--ink)!important}
+ul.items li.fn-dim{opacity:.4}
+#poster.fnfilter .chip[data-kind="s"]:not(.fn-on),#poster.fnfilter .chip[data-kind="x"]:not(.fn-on){opacity:.12}
+#poster.fnfilter .chip.fn-on .chip-bg{stroke-opacity:.9}
+#poster.fnfilter .chip.fn-on .chip-rect{fill-opacity:.9}
+#poster.fnfilter .chip.fn-on .xchip{stroke:var(--ink)}
+#poster.fnfilter .chip.fn-on text{fill:var(--pillInk);font-weight:700}
+#poster.fnfilter .chip.xl.fn-on text{fill:var(--ink)}
+.t-pdr{font-weight:600}
 
 /* dataflow */
 .chan{stroke:var(--muted);stroke-opacity:.5;stroke-width:.22;stroke-dasharray:.7 .9}

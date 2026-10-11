@@ -19,13 +19,14 @@ const panel = $("panel");
 const tip = $("tip");
 const byN = Object.fromEntries(LAYERS.map(l => [l.n, l]));
 const KIND = { p: "Protocol / standard", s: "Security technology" };
-const PDU = n => n >= 5 ? "DATA" : n === 4 ? "SEGMENT" : n === 3 ? "PACKET" : n === 2 ? "FRAME" : "BITS";
+const PDU = n => n === 8 ? "INTENT" : n >= 5 ? "DATA" : n === 4 ? "SEGMENT" : n === 3 ? "PACKET" : n === 2 ? "FRAME" : "BITS";
 
 /* ---------- geometry (SVG user units = millimetres on A3) ---------- */
-const G = { R: 96, r0: 31, cy: 151, cx: { p: 109, s: 311 } };
-const ringW = (G.R - G.r0) / 6;
-const FS = { "t-chip-p": 2.7, "t-chip-s": 2.8, "t-pill": 2.7 };
-const CHIP_H = 4.15, PAD = 1.25, MINGAP = 0.9, PILL_PAD = 1.7;
+const G = { R: 96, r0: 26, cy: 151, cx: { p: 109, s: 311 } };
+const RINGS = 8;                     // L7 … L0 as rings, L8 as the core disc
+const ringW = (G.R - G.r0) / RINGS;
+const FS = { "t-chip-p": 2.45, "t-chip-s": 2.55, "t-pill": 2.45 };
+const CHIP_H = 3.7, PAD = 1.25, MINGAP = 0.9, PILL_PAD = 1.7;
 const CH = 3.9;                       // half-height of the dataflow channel kept clear of chips
 const X0 = G.cx.p + G.r0, X1 = G.cx.s - G.r0;
 
@@ -54,6 +55,9 @@ function measure(text, cls) {
   mcache.set(key, w);
   return w;
 }
+
+const FN = { P: "Prevent", D: "Detect", R: "Respond" };
+const pdr = items => { const c = { P: 0, D: 0, R: 0 }; items.forEach(it => [...(it.f || "")].forEach(k => c[k]++)); return c; };
 
 /* ---------- chips ---------- */
 function arcChip(g, cx, cy, r, phi, text, cls, w, pill) {
@@ -115,7 +119,7 @@ function layoutRing(g, layer, kind, cx, ri, ro) {
   const start = -Math.PI / 2 + labelHalf, end = 1.5 * Math.PI - labelHalf;
   const chanA = kind === "p" ? 0 : Math.PI;     // channel faces the other ring set
 
-  for (const radii of [[rMid], [rMid + 2.55, rMid - 2.55]]) {
+  for (const radii of [[rMid], [rMid + 2.2, rMid - 2.2]]) {
     const slots = [];
     for (const r of radii) {
       const e = (CH + 0.4) / r;
@@ -147,14 +151,14 @@ function layoutCentre(g, layer, kind, cx) {
   const cls = kind === "p" ? "t-chip-p" : "t-chip-s";
   const items = layer[kind === "p" ? "protocols" : "security"];
   const widths = items.map(it => measure(it.n, cls) + 2 * PAD);
-  const label = `${layer.n} · ${layer.name.toUpperCase()}`;
-  const labelY = cy - r0 + 5.4;
+  const label = `${layer.n} · ${(layer.short || layer.name).toUpperCase()}`;
+  const labelY = cy - r0 + 5.0;
   rectChip(g, cx, labelY, label, "t-pill", measure(label, "t-pill"), true);
-  const lineH = CHIP_H + 1.05, yTop = labelY + lineH + 0.4, yBot = cy + r0 - 3.4, gapX = 1.1;
-  const chord = y => { const dy = Math.abs(y - cy) + CHIP_H / 2; return dy >= r0 ? 0 : 2 * Math.sqrt(r0 * r0 - dy * dy) - 4.2; };
+  const lineH = CHIP_H + 0.9, yTop = labelY + lineH + 0.2, yBot = cy + r0 - 3.0, gapX = 1.0;
+  const chord = y => { const dy = Math.abs(y - cy) + CHIP_H / 2; return dy >= r0 ? 0 : 2 * Math.sqrt(r0 * r0 - dy * dy) - 3.6; };
   let plan = null;
   for (let n = 1; n < 14 && !plan; n++) {
-    const mid = (yTop + yBot) / 2 + 1.2;
+    const mid = (yTop + yBot) / 2 + 0.6;
     const ys = Array.from({ length: n }, (_, i) => mid + (i - (n - 1) / 2) * lineH);
     const rows = []; let i = 0;
     for (const y of ys) {
@@ -184,10 +188,10 @@ function build() {
   el("rect", { x: 0, y: 0, width: 420, height: 297, class: "bgrect" }, svg);
 
   txt(svg, { x: 12, y: 17.5, class: "t-title" }, "OSI Model — Protocols & Security Technologies by Layer");
-  txt(svg, { x: 12, y: 24.2, class: "t-sub" }, "Concentric view of the seven-layer reference model (ISO/IEC 7498-1): Layer 1 Physical forms the outer ring, Layer 7 Application sits at the core.");
+  txt(svg, { x: 12, y: 24.2, class: "t-sub" }, "The seven-layer OSI model (ISO/IEC 7498-1) extended with Layer 0 (hardware, firmware & supply chain) on the outer ring and Layer 8 (people & governance) at the core.");
   txt(svg, { x: 408, y: 14.5, class: "t-meta", "text-anchor": "end" }, "SECURITY ARCHITECTURE REFERENCE");
   txt(svg, { x: 408, y: 19, class: "t-meta", "text-anchor": "end" }, "DEFENCE IN DEPTH · LAYER BY LAYER");
-  txt(svg, { x: 408, y: 23.5, class: "t-meta", "text-anchor": "end" }, "OSI.CYBERASSURE.UK  ·  v1.1 · OCTOBER 2026");
+  txt(svg, { x: 408, y: 23.5, class: "t-meta", "text-anchor": "end" }, "OSI.CYBERASSURE.UK  ·  v2.0 · OCTOBER 2026");
   el("line", { x1: 12, x2: 408, y1: 29, y2: 29, class: "rule" }, svg);
 
   for (const kind of ["p", "s"]) {
@@ -198,10 +202,10 @@ function build() {
     const set = el("g", { class: "set", "data-set": kind }, svg);
     for (const layer of LAYERS) {
       const g = el("g", { class: "layer", "data-layer": layer.n, style: `--c:${layer.colour}` }, set);
-      if (layer.n === 7) layoutCentre(g, layer, kind, cx);
-      else { const ri = G.r0 + (6 - layer.n) * ringW; layoutRing(g, layer, kind, cx, ri, ri + ringW); }
+      if (layer.n === 8) layoutCentre(g, layer, kind, cx);
+      else { const ri = G.r0 + (7 - layer.n) * ringW; layoutRing(g, layer, kind, cx, ri, ri + ringW); }
     }
-    for (let i = 0; i <= 6; i++) el("circle", { cx, cy: G.cy, r: G.r0 + i * ringW, class: "sep", "pointer-events": "none" }, set);
+    for (let i = 0; i <= RINGS; i++) el("circle", { cx, cy: G.cy, r: G.r0 + i * ringW, class: "sep", "pointer-events": "none" }, set);
   }
 
   // dataflow channel: sender core → wire → receiver core
@@ -216,14 +220,23 @@ function build() {
 
   // footer
   el("line", { x1: 12, x2: 408, y1: 254, y2: 254, class: "rule" }, svg);
-  txt(svg, { x: 12, y: 260, class: "t-kick" }, "LAYER KEY  ·  PROTOCOL DATA UNIT");
-  [...LAYERS].reverse().forEach((l, i) => {
-    const x = 12 + i * 36, y = 267.5;
+  txt(svg, { x: 12, y: 260, class: "t-kick" }, "LAYER KEY  ·  DATA UNIT  ·  CONTROLS BY FUNCTION (PREVENT · DETECT · RESPOND)");
+  const keys = [...LAYERS].reverse().map(l => {
+    const c = pdr(l.security), line3 = `P${c.P} · D${c.D} · R${c.R}`;
+    const nm = l.short || l.name;
+    return { l, nm, line3, w: 7.6 + Math.max(measure(nm, "t-key"), measure(l.pdu, "t-keysub"), measure(line3, "t-keysub")) };
+  });
+  const kgap = (252 - keys.reduce((a, k) => a + k.w, 0)) / (keys.length - 1);
+  let kx = 12;
+  keys.forEach(({ l, nm, line3, w }) => {
+    const x = kx, y = 266.5;
+    kx += w + kgap;
     const g = el("g", { class: "layer key", "data-layer": l.n, style: `--c:${l.colour}` }, svg);
-    el("rect", { x, y: y - 3.4, width: 6.2, height: 6.2, rx: 1.4, class: "pill-rect" }, g);
-    txt(g, { x: x + 3.1, y: y + 0.85, class: "t-pill", "text-anchor": "middle" }, l.n);
-    txt(g, { x: x + 8, y: y - 0.3, class: "t-key" }, l.name);
-    txt(g, { x: x + 8, y: y + 3, class: "t-keysub" }, l.pdu);
+    el("rect", { x, y: y - 3.4, width: 5.8, height: 5.8, rx: 1.3, class: "pill-rect" }, g);
+    txt(g, { x: x + 2.9, y: y + 0.4, class: "t-pill", "text-anchor": "middle" }, l.n);
+    txt(g, { x: x + 7.6, y: y - 0.6, class: "t-key" }, nm);
+    txt(g, { x: x + 7.6, y: y + 2.5, class: "t-keysub" }, l.pdu);
+    txt(g, { x: x + 7.6, y: y + 5.4, class: "t-keysub t-pdr" }, line3);
   });
   txt(svg, { x: 270, y: 260, class: "t-kick" }, "CROSS-LAYER CAPABILITIES");
   let x = 270, y = 266;
@@ -236,7 +249,7 @@ function build() {
     x += w + 1.1;
   });
   txt(svg, { x: 12, y: 283, class: "t-note" }, "Mapping is indicative: several protocols span layers or sit differently in the TCP/IP model (e.g. TLS spans L4–L7; BGP runs over TCP but is charted at L3 for its routing role).");
-  txt(svg, { x: 12, y: 287.5, class: "t-note" }, "Controls are listed at the layer they primarily act on. No single layer is sufficient — combine controls across layers for defence in depth.");
+  txt(svg, { x: 12, y: 287.5, class: "t-note" }, "Teaching model: ring position does not imply trust — apply Zero Trust at every ring. Controls sit at the layer they primarily act on; P / D / R = prevent, detect, respond.");
   const a = el("a", { href: "https://www.linkedin.com/in/jonsilvester", target: "_blank", rel: "noopener noreferrer" }, svg);
   txt(a, { x: 408, y: 287.5, class: "t-credit", "text-anchor": "end" }, "Jon Silvester · linkedin.com/in/jonsilvester");
 }
@@ -266,7 +279,7 @@ function wireInteraction() {
     if (ch) {
       const { item, kicker, c } = itemOf(ch);
       tip.style.setProperty("--c", c);
-      tip.innerHTML = `<div class="k">${esc(kicker)}</div><div class="n">${esc(item.n)}</div><div class="d">${esc(item.d)}</div>`;
+      tip.innerHTML = `<div class="k">${esc(kicker)}</div><div class="n">${esc(item.n)}${fnBadges(item)}</div><div class="d">${esc(item.d)}</div>`;
       tip.classList.add("show");
     } else tip.classList.remove("show");
   });
@@ -288,6 +301,8 @@ function wireInteraction() {
     const b = e.target.closest("[data-go]");
     if (b) { const v = b.dataset.go; pinned = v === "all" ? null : +v; hovered = null; applyFocus(); renderPanel(); }
     if (e.target.closest("[data-flow]")) setFlow(!F.on, true);
+    const fb = e.target.closest("[data-fn]");
+    if (fb) { fnFilter = fb.dataset.fn; applyFnFilter(); renderPanel(); }
   });
   panel.addEventListener("mouseover", e => {
     svg.querySelectorAll(".chip.hl").forEach(c => c.classList.remove("hl"));
@@ -311,23 +326,41 @@ function wireInteraction() {
     if (e.target === qEl) { if (e.key === "Escape") { qEl.value = ""; qEl.dispatchEvent(new Event("input")); qEl.blur(); } return; }
     if (e.target.closest && e.target.closest("input,textarea")) return;
     if (e.key === "Escape") { pinned = null; hovered = null; applyFocus(); renderPanel(); }
-    if (/^[1-7]$/.test(e.key)) { pinned = +e.key; applyFocus(); renderPanel(); }
+    if (/^[0-8]$/.test(e.key)) { pinned = +e.key; applyFocus(); renderPanel(); }
     if (e.key === "/") { e.preventDefault(); qEl.focus(); }
     if (e.key === " " && e.target === document.body) { e.preventDefault(); setFlow(!F.on, true); }
   });
 }
 
+const fnBadges = it => it.f ? ` <span class="fnb">${[...it.f].map(k => `<abbr class="fb fb-${k}" title="${FN[k]}">${k}</abbr>`).join("")}</span>` : "";
+let fnFilter = "all";
+function applyFnFilter() {
+  svg.classList.toggle("fnfilter", fnFilter !== "all");
+  svg.querySelectorAll('.chip[data-kind="s"], .chip[data-kind="x"]').forEach(c => {
+    const { item } = itemOf(c);
+    c.classList.toggle("fn-on", fnFilter !== "all" && (item.f || "").includes(fnFilter));
+  });
+}
 function navHTML(active) {
-  return `<div class="nav"><div class="lbl">Select a layer · keys 1–7</div><div class="row">
+  const fnRow = `<div class="lbl lbl2">Control function</div><div class="fnseg" role="group" aria-label="Filter controls by function">${["all", "P", "D", "R"].map(k => `<button type="button" data-fn="${k}" aria-pressed="${fnFilter === k}">${k === "all" ? "All" : `<abbr class="fb fb-${k}">${k}</abbr>${FN[k]}`}</button>`).join("")}</div>`;
+  return `<div class="nav"><div class="lbl">Select a layer · keys 0–8</div><div class="row">
     <button class="all ${active == null ? "on" : ""}" data-go="all" style="--c:var(--ink)">All</button>
     ${[...LAYERS].reverse().map(l => `<button data-go="${l.n}" class="${active === l.n ? "on" : ""}" style="--c:${l.colour}" aria-label="Layer ${l.n} ${l.name}">L${l.n}</button>`).join("")}
-  </div></div>`;
+  </div>${fnRow}</div>`;
 }
 function listHTML(l, kind) {
   const items = l[kind === "p" ? "protocols" : "security"];
-  return `<ul class="items">${items.map((it, i) => `<li data-layer="${l.n}" data-kind="${kind}" data-idx="${i}" style="--c:${l.colour}"><b><i></i>${esc(it.n)}</b><span>${esc(it.d)}</span></li>`).join("")}</ul>`;
+  return `<ul class="items">${items.map((it, i) => `<li data-layer="${l.n}" data-kind="${kind}" data-idx="${i}" style="--c:${l.colour}" class="${kind === "s" && fnFilter !== "all" && !(it.f || "").includes(fnFilter) ? "fn-dim" : ""}"><b><i></i>${esc(it.n)}${kind === "s" ? fnBadges(it) : ""}</b><span>${esc(it.d)}</span></li>`).join("")}</ul>`;
 }
 const CREDIT = `<div class="credit">Created by <a href="https://www.linkedin.com/in/jonsilvester" target="_blank" rel="noopener noreferrer me">Jon Silvester</a> — Security Architecture.</div>`;
+function covTable() {
+  const rows = [...LAYERS].reverse().map(l => { const c = pdr(l.security); return `<tr><th><span class="n" style="--c:${l.colour}">L${l.n}</span>${esc(l.short || l.name)}</th>${["P", "D", "R"].map(k => `<td class="${c[k] ? "" : "zero"}">${c[k]}</td>`).join("")}</tr>`; }).join("");
+  return `<table class="covt"><thead><tr><th></th><th><abbr class="fb fb-P">P</abbr></th><th><abbr class="fb fb-D">D</abbr></th><th><abbr class="fb fb-R">R</abbr></th></tr></thead><tbody>${rows}</tbody></table><p class="hint">Most layers are heavy on prevention. Detection and response cluster in a few controls and in the cross-layer capabilities, which is typical and worth challenging.</p>`;
+}
+function coverage(l) {
+  const c = pdr(l.security), max = Math.max(1, c.P, c.D, c.R);
+  return `<div class="cov">${["P", "D", "R"].map(k => `<div><abbr class="fb fb-${k}">${k}</abbr><span>${FN[k]}</span><i style="--w:${(c[k] / max) * 100}%"></i><b>${c[k]}</b></div>`).join("")}</div>`;
+}
 function renderPanel() {
   if (!panel) return;
   if (query) return renderSearch();
@@ -336,14 +369,16 @@ function renderPanel() {
     const demo = [...LAYERS].reverse().slice(1, 4).map(l => `<i style="background:${l.colour}"></i>`).join("");
     panel.innerHTML = navHTML(null) + `<div class="pbody">
       <h2>Defence in depth, layer by layer</h2>
-      <p>Each ring is one OSI layer — <b>Layer 1 Physical</b> on the outside, <b>Layer 7 Application</b> at the core. The left set shows the protocols and standards at each layer; the right set shows the security technologies that defend it.</p>
+      <p>Each ring is one layer of the OSI model, extended with <b>Layer 0</b> (hardware, firmware &amp; supply chain) on the outside and <b>Layer 8</b> (people &amp; governance) at the core. The left set shows what runs at each layer; the right set shows the controls that defend it, tagged <abbr class="fb fb-P">P</abbr> prevent, <abbr class="fb fb-D">D</abbr> detect, <abbr class="fb fb-R">R</abbr> respond.</p>
+      <p class="caveat">A teaching model, not a trust model: position on the rings does not confer trust. Phishing and credential theft land straight at Layers 7–8, so apply Zero Trust at every ring.</p>
       <p>Hover a ring to link the two sets, click to pin it, hover any chip for a description. <kbd>Esc</kbd> clears, <kbd>/</kbd> searches.</p>
       <h3>Animated dataflow</h3>
       <p>Packets leave the application at the core of the sending stack and gain a header at every layer on the way out <span class="pk-demo">${demo}<i style="background:var(--payload)"></i></span> (encapsulation). They cross the wire as bits, then the receiving stack inspects and strips each header in turn. <b style="color:var(--bad)">Red</b> packets carry an attack — watch which control stops them.</p>
       <p><button class="btn" type="button" data-flow>${F.on ? "Pause" : "Play"} dataflow</button> <kbd>Space</kbd></p>
       <h3>Layers</h3><div class="legend">${[...LAYERS].reverse().map(l => `<button data-go="${l.n}" style="--c:${l.colour}"><span class="n">L${l.n}</span><span>${l.name}<br><small>${l.pdu}</small></span><small>${l.protocols.length} · ${l.security.length}</small></button>`).join("")}</div>
+      <h3>Control coverage by function</h3>${covTable()}
       <h3>Cross-layer capabilities</h3>
-      <ul class="items">${CROSS_LAYER.map(c => `<li style="--c:var(--muted)"><b><i></i>${esc(c.n)}</b><span>${esc(c.d)}</span></li>`).join("")}</ul>
+      <ul class="items">${CROSS_LAYER.map(c => `<li style="--c:var(--muted)"><b><i></i>${esc(c.n)}${fnBadges(c)}</b><span>${esc(c.d)}</span></li>`).join("")}</ul>
       <h3>Downloads</h3>
       <div class="dl"><a class="btn" href="/OSI-Security-Rings-A3.pdf" download>A3 PDF · dark</a><a class="btn" href="/OSI-Security-Rings-A3-print-light.pdf" download>A3 PDF · light (print)</a></div>
       ${CREDIT}
@@ -357,7 +392,7 @@ function renderPanel() {
     <p class="fn">${esc(l.fn)}</p>
     <h3>Example threats</h3><div class="threats">${l.threats.map(t => `<span>${esc(t)}</span>`).join("")}</div>
     <h3>Protocols & standards <span>${l.protocols.length}</span></h3>${listHTML(l, "p")}
-    <h3>Security technologies <span>${l.security.length}</span></h3>${listHTML(l, "s")}
+    <h3>Security technologies <span>${l.security.length}</span></h3>${coverage(l)}${listHTML(l, "s")}
     ${blocked.length ? `<h3>Stopped here in the dataflow</h3><ul class="items">${blocked.map(t => `<li data-layer="${n}" data-kind="s" data-idx="${l.security.findIndex(s => s.n === t.control)}" style="--c:var(--bad)"><b><i></i>${esc(t.name)}</b><span>Blocked by ${esc(t.control)}</span></li>`).join("")}</ul>` : ""}
     <div class="pager">${next ? `<button class="btn" data-go="${next.n}">↑ L${next.n} ${next.name}</button>` : "<span></span>"}${prev ? `<button class="btn" data-go="${prev.n}">L${prev.n} ${prev.name} ↓</button>` : ""}</div>
   </div>`;
@@ -368,7 +403,7 @@ function renderSearch() {
     if ((it.n + " " + it.d).toLowerCase().includes(query)) res.push({ l, kind, it, i });
   });
   panel.innerHTML = navHTML(null) + `<div class="pbody"><h3>${res.length} match${res.length === 1 ? "" : "es"} <span>“${esc(query)}”</span></h3>
-    <ul class="items">${res.map(r => `<li data-layer="${r.l.n}" data-kind="${r.kind}" data-idx="${r.i}" style="--c:${r.l.colour}"><b><i></i>${esc(r.it.n)}<em>L${r.l.n} · ${r.kind === "p" ? "protocol" : "control"}</em></b><span>${esc(r.it.d)}</span></li>`).join("")}</ul></div>`;
+    <ul class="items">${res.map(r => `<li data-layer="${r.l.n}" data-kind="${r.kind}" data-idx="${r.i}" style="--c:${r.l.colour}"><b><i></i>${esc(r.it.n)}${r.kind === "s" ? fnBadges(r.it) : ""}<em>L${r.l.n} · ${r.kind === "p" ? "protocol" : "control"}</em></b><span>${esc(r.it.d)}</span></li>`).join("")}</ul></div>`;
 }
 
 /* ---------- theme ---------- */
@@ -396,7 +431,7 @@ const SPEED = 20;                                    // mm per second along the 
 const rnd = a => a[Math.floor(Math.random() * a.length)];
 const bits = () => Array.from({ length: 9 }, () => (Math.random() < 0.5 ? "0" : "1")).join("");
 function where(x) {
-  const ln = d => d < G.r0 ? 7 : Math.max(1, 6 - Math.floor((d - G.r0) / ringW));
+  const ln = d => d < G.r0 ? 8 : Math.max(0, 7 - Math.floor((d - G.r0) / ringW));
   if (x <= G.cx.p + G.R) return { side: "tx", n: ln(x - G.cx.p) };
   if (x >= G.cx.s - G.R) return { side: "rx", n: ln(G.cx.s - x) };
   return { side: "wire", n: 0 };
@@ -464,7 +499,7 @@ function deliver(p) {
   p.dead = true; p.g.remove();
   el("circle", { cx: G.cx.s, cy: G.cy, r: G.r0, class: "deliver" }, flowG).addEventListener("animationend", e => e.target.remove());
   F.delivered++;
-  logEvent("ok", "DELIVERED", { main: p.label, sub: "· passed all 7 layers" });
+  logEvent("ok", "DELIVERED", { main: p.label, sub: "· passed all 9 layers" });
 }
 function tick(ts) {
   if (!F.on) return;

@@ -1,15 +1,18 @@
 # OSI Security Rings
 
-An interactive, concentric view of the OSI model. **Ring set A** shows the protocols and standards at each layer, and **ring set B** shows the security technologies that defend that layer. Layer 1 Physical is the outer ring and Layer 7 Application is the core.
+An interactive, concentric view of the OSI model, extended with **Layer 0** (hardware, firmware and supply chain) on the outer ring and **Layer 8** (people and governance) at the core. **Ring set A** shows the protocols and standards at each layer, and **ring set B** shows the security controls that defend it. Each control is tagged **P**revent, **D**etect or **R**espond.
 
-Animated dataflows show packets gaining a header at each layer as they leave the sending stack (encapsulation) and crossing the wire as bits. The receiving stack then inspects each packet and strips its headers one layer at a time. Malicious packets are stopped by a named control, and that control's chip on the rings lights up.
+Animated dataflows show packets gaining a header at each layer as they leave the sending stack (encapsulation) and crossing the wire as bits. The receiving stack then inspects each packet and strips its headers one layer at a time. Malicious packets, from firmware implants at Layer 0 to phishing at Layer 8, are stopped by a named control, and that control lights up on the rings.
+
+> This is a teaching model, not a trust model. Position on the rings does not confer trust, so apply Zero Trust at every ring.
 
 Live at **<https://osi.cyberassure.uk>** · Created by [Jon Silvester](https://www.linkedin.com/in/jonsilvester).
 
 ## Features
 
 - Hover a layer to link both ring sets, or click to pin it. The side panel then shows the layer's function, example threats, protocols, controls and the attacks stopped at that layer.
-- Search across all protocols and controls (press `/`). Press `1`–`7` to jump to a layer, `Space` to play or pause the dataflow, and `Esc` to clear.
+- Filter controls by function (Prevent, Detect or Respond) to see where coverage is thin. The overview panel includes a coverage table for each layer, and the PDF key shows the same counts.
+- Search across all protocols and controls (press `/`). Press `0`–`8` to jump to a layer, `Space` to play or pause the dataflow, and `Esc` to clear.
 - The theme switcher offers Auto (follows the system setting), Dark and Light, and remembers your choice.
 - Animation is off by default for visitors whose system is set to reduce motion.
 - A3 landscape PDFs are included in a dark version and a light version for printing. Printing from the browser also produces A3 landscape.
@@ -51,7 +54,7 @@ You can check the headers after deployment at <https://securityheaders.com>.
 
 All the content lives in `data.js`:
 
-- `LAYERS` holds the protocols, controls, descriptions and threats for each layer.
+- `LAYERS` holds the protocols, controls, descriptions and threats for each of Layers 0–8. Each control has an `f` tag made from the letters `P`, `D` and `R` (prevent, detect, respond); a control can have more than one.
 - `CROSS_LAYER` holds the capabilities that apply to every layer.
 - `THREATS` holds the attacks used in the dataflow. Each threat's `control` must exactly match a security item name at its layer.
 - `BENIGN` holds the labels for legitimate traffic.
